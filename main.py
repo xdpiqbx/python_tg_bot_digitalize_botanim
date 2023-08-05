@@ -4,21 +4,13 @@ import messages_texts
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
-# from db.database import Database
+
+from books import get_all_books
 
 load_dotenv()
 
-# db = Database()
-
 
 async def start_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    # await update.message.reply_text(f'Hello {update.effective_user.first_name}')
-
-    with open('db/init_database.sql', 'r') as sql_file:
-        sql_text = sql_file.read()
-    sql_queries = sql_text.split(';')
-
-
     await context.bot.send_message(
         update.effective_chat.id,
         messages_texts.GREETINGS
@@ -32,6 +24,16 @@ async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     )
 
 
+async def all_books_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    all_books_chunks = await get_all_books(chunk_size=60)
+    for chunk in all_books_chunks:
+        response = "\n".join([book.name for book in chunk])
+        await context.bot.send_message(
+            update.effective_chat.id,
+            text=response
+        )
+
+
 def main() -> None:
     app = (
         ApplicationBuilder()
@@ -41,6 +43,7 @@ def main() -> None:
 
     app.add_handler(CommandHandler("start", start_cmd))
     app.add_handler(CommandHandler("help", help_cmd))
+    app.add_handler(CommandHandler("all_books", all_books_cmd))
 
     app.run_polling()
 

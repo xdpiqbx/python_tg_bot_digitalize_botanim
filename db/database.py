@@ -1,18 +1,24 @@
 import sqlite3
-from db import query
 
 
 class Database:
     def __init__(self):
-        self.connection = sqlite3.connect('db/base.db')
+        self.connection = sqlite3.connect('base.db')
         self.cursor = self.connection.cursor()
 
-    def init_database(self):
-        with open('init_database.sql', 'r') as sql_file:
+    def execute_queries_from_sql_file(self, path_to_sql_file):
+        with open(path_to_sql_file, 'r', encoding='utf-8') as sql_file:
             sql_text = sql_file.read()
-
         sql_queries = sql_text.split(';')
-        print(sql_queries)
+
+        for q in sql_queries:
+            try:
+                self.cursor.execute(q.strip())
+            except sqlite3.OperationalError as error:
+                print(q)
+                print(error)
+                self.connection.rollback()
+        self.connection.commit()
 
     # def create_table(self):
     #     self.cursor.execute(query.create_table_users())
@@ -26,6 +32,17 @@ class Database:
     #     self.cursor.execute(query.select_all_users())
     #     return self.cursor.fetchall()
     #
-    # def close(self):
-    #     self.cursor.close()
-    #     self.connection.close()
+    def close(self):
+        self.cursor.close()
+        self.connection.close()
+
+
+def main():
+    db = Database()
+    db.execute_queries_from_sql_file('init_database.sql')
+    db.execute_queries_from_sql_file('init_insert_data.sql')
+    db.close()
+
+
+if __name__ == '__main__':
+    main()
