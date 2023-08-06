@@ -35,6 +35,7 @@ async def all_books_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             parse_mode=constants.ParseMode.HTML
         )
 
+
 async def already_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     pass
 
@@ -46,10 +47,37 @@ def main() -> None:
         .build()
     )
 
-    app.add_handler(CommandHandler("start", start_cmd, filters=filters.User(username=os.environ['MY_USER_NAME'])))
-    app.add_handler(CommandHandler("help", help_cmd, filters=filters.User(username=os.environ['MY_USER_NAME'])))
-    app.add_handler(CommandHandler("all_books", all_books_cmd, filters=filters.User(username=os.environ['MY_USER_NAME'])))
-    app.add_handler(CommandHandler("already", already_cmd, filters=filters.User(username=os.environ['MY_USER_NAME'])))
+    app.add_handler(
+        CommandHandler(
+            "start",
+            start_cmd,
+            filters=filters.User(username=os.environ['MY_USER_NAME'])
+        )
+    )
+
+    app.add_handler(
+        CommandHandler(
+            "help",
+            help_cmd,
+            filters=filters.User(username=os.environ['MY_USER_NAME'])
+        )
+    )
+
+    app.add_handler(
+        CommandHandler(
+            "all_books",
+            all_books_cmd,
+            filters=filters.User(username=os.environ['MY_USER_NAME'])
+        )
+    )
+
+    app.add_handler(
+        CommandHandler(
+            "already",
+            already_cmd,
+            filters=filters.User(username=os.environ['MY_USER_NAME'])
+        )
+    )
 
     app.run_polling()
 
