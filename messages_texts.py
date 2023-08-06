@@ -7,8 +7,10 @@ HELP = """Existing commands:
 /start
 /help
 /all_books
+/already
 """
 
-ALL_BOOKS = """AllBooks:
-Lorem ipsum...
-"""
+# start - Start bot
+# help - Help info
+# all_books - All books
+# already - Already read books

@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from telegram import Update, constants
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, filters
 
-from books import get_all_books
+from books import get_all_books, get_already_read_books
 
 load_dotenv()
 
@@ -37,7 +37,20 @@ async def all_books_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
 
 async def already_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    pass
+    books = await get_already_read_books()
+    response = "Уже прочитали:\n\n"
+    response += '\n'.join([
+        f"{i}. {book.name}.\n"
+        f"<em>Читали: с {book.read_start.strftime('%d.%m.%Y')} "
+        f"по {book.read_finish.strftime('%d.%m.%Y')}</em>"
+        for i, book
+        in enumerate(books, 1)
+    ])
+    await context.bot.send_message(
+        update.effective_chat.id,
+        text=response,
+        parse_mode=constants.ParseMode.HTML
+    )
 
 
 def main() -> None:

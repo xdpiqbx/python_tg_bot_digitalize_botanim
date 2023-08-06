@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 import aiosqlite
-
+from datetime import date
 
 # def _chunk_list(lst, chunk_size):
 #     for i in range(0, len(lst), chunk_size):
@@ -72,3 +72,32 @@ async def get_all_books() -> list[Category]:
                     read_finish=row["read_finish"]
                 ))
     return _group_books_by_categories(books)
+
+async def get_already_read_books() -> list[Book]:
+    books = []
+    query = """
+            SELECT
+                b.id AS book_id,
+                b.name AS book_name,
+                b.category_id,
+                bc.name as category_name,
+                b.read_start,
+                b.read_finish
+            FROM book AS b
+            JOIN book_category AS bc
+            ON b.category_id = bc.id
+            WHERE b.read_finish <= date('now');
+        """
+    async with aiosqlite.connect('db/base.db') as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute(query) as cursor:
+            async for row in cursor:
+                books.append(Book(
+                    id=row["book_id"],
+                    name=row["book_name"],
+                    category_id=row["category_id"],
+                    category_name=row["category_name"],
+                    read_start=datetime.strptime(row["read_start"], '%Y-%m-%d'),
+                    read_finish=datetime.strptime(row["read_finish"], '%Y-%m-%d')
+                ))
+    return books
