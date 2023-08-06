@@ -13,8 +13,8 @@ CREATE TABLE IF NOT EXISTS book (
     created_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
     name TEXT,
     ordering INTEGER NOT NULL,
-    read_start TIMESTAMP,
-    read_finish TIMESTAMP,
+    read_start DATE,
+    read_finish DATE,
     category_id INTEGER,
     UNIQUE(category_id, ordering),
     FOREIGN KEY(category_id) REFERENCES book_category(id)

@@ -24,6 +24,7 @@ class Category:
     name: str
     books: list[Book] = field(default_factory=list)
 
+
 def _group_books_by_categories(books: list[Book]) -> list[Category]:
     categories = []
     category_id = None
@@ -43,9 +44,6 @@ def _group_books_by_categories(books: list[Book]) -> list[Category]:
     return categories
 
 
-
-
-# async def get_all_books(chunk_size: int | None):
 async def get_all_books() -> list[Category]:
     books = []
     query = """
@@ -73,6 +71,4 @@ async def get_all_books() -> list[Category]:
                     read_start=row["read_start"],
                     read_finish=row["read_finish"]
                 ))
-    # if chunk_size:
-    #     return _chunk_list(books, chunk_size)
     return _group_books_by_categories(books)

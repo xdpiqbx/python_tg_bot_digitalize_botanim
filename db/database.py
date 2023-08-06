@@ -29,6 +29,8 @@ def main():
     db = Database()
     # db.execute_queries_from_sql_file('init_database.sql')
     # db.execute_queries_from_sql_file('init_insert_data.sql')
+    # db.execute_queries_from_sql_file('updates.sql')
+
     db.close()
 
 
