@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from telegram import Update, constants
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, filters
 
-from books import get_all_books, get_already_read_books, get_now_reading_book
+from books import get_all_books, get_already_read_books, get_now_reading_book, get_not_started_books
 
 load_dotenv()
 
@@ -67,6 +67,22 @@ async def now_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         parse_mode=constants.ParseMode.HTML
     )
 
+async def vote_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    all_books_by_categories = await get_not_started_books()
+    for category in all_books_by_categories:
+        books_in_category = "\n".join([f"🆔 [<b>{book.id}</b>] 📙{book.name}" for book in category.books])
+        response = f"<b>📚{category.name}</b>:\n\n{books_in_category}"
+        await context.bot.send_message(
+            update.effective_chat.id,
+            text=response,
+            parse_mode=constants.ParseMode.HTML
+        )
+    await context.bot.send_message(
+        update.effective_chat.id,
+        text=messages_texts.VOTE,
+        parse_mode=constants.ParseMode.HTML
+    )
+
 
 def main() -> None:
     app = (
@@ -111,6 +127,14 @@ def main() -> None:
         CommandHandler(
             "now",
             now_cmd,
+            filters=filters.User(username=os.environ['MY_USER_NAME'])
+        )
+    )
+
+    app.add_handler(
+        CommandHandler(
+            "vote",
+            vote_cmd,
             filters=filters.User(username=os.environ['MY_USER_NAME'])
         )
     )
