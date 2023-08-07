@@ -18,3 +18,10 @@
 --    read_start='2023-01-01',
 --    read_finish='2023-02-12'
 --WHERE name LIKE 'PostgreSQL. Основы языка SQL :: Евгений Моргунов';
+
+-- This update for test
+--UPDATE book
+--SET
+--    read_start='2023-08-01',
+--    read_finish='2023-09-01'
+--WHERE name LIKE 'Рефакторинг. Улучшение существующего кода%';

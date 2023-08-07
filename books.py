@@ -86,7 +86,38 @@ async def get_already_read_books() -> list[Book]:
             FROM book AS b
             JOIN book_category AS bc
             ON b.category_id = bc.id
-            WHERE b.read_finish <= date('now');
+            WHERE b.read_finish <= date('now')
+            ORDER BY bc.read_start;
+        """
+    async with aiosqlite.connect('db/base.db') as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute(query) as cursor:
+            async for row in cursor:
+                books.append(Book(
+                    id=row["book_id"],
+                    name=row["book_name"],
+                    category_id=row["category_id"],
+                    category_name=row["category_name"],
+                    read_start=datetime.strptime(row["read_start"], '%Y-%m-%d'),
+                    read_finish=datetime.strptime(row["read_finish"], '%Y-%m-%d')
+                ))
+    return books
+
+async def get_now_reading_book() -> list[Book]:
+    books = []
+    query = """
+            SELECT
+                b.id AS book_id,
+                b.name AS book_name,
+                b.category_id,
+                bc.name as category_name,
+                b.read_start,
+                b.read_finish
+            FROM book as b
+            JOIN book_category AS bc
+                ON b.category_id = bc.id
+            WHERE read_start <= date('now') AND read_finish >= date('now')
+            ORDER BY b.read_start;
         """
     async with aiosqlite.connect('db/base.db') as db:
         db.row_factory = aiosqlite.Row

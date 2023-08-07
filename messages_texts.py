@@ -8,6 +8,7 @@ HELP = """Existing commands:
 /help
 /all_books
 /already
+/now
 """
 
 # start - Start bot

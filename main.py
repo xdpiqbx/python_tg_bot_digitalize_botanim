@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from telegram import Update, constants
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, filters
 
-from books import get_all_books, get_already_read_books
+from books import get_all_books, get_already_read_books, get_now_reading_book
 
 load_dotenv()
 
@@ -52,6 +52,21 @@ async def already_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         parse_mode=constants.ParseMode.HTML
     )
 
+async def now_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    books = await get_now_reading_book()
+    response = "Сейчас мы читаем 📖:\n\n"
+    response += '\n'.join([
+        f"{i}. {book.name}.\n"
+        f"<em>Читаeм: с {book.read_start.strftime('%d.%m.%Y')}</em>"
+        for i, book
+        in enumerate(books, 1)
+    ])
+    await context.bot.send_message(
+        update.effective_chat.id,
+        text=response,
+        parse_mode=constants.ParseMode.HTML
+    )
+
 
 def main() -> None:
     app = (
@@ -88,6 +103,14 @@ def main() -> None:
         CommandHandler(
             "already",
             already_cmd,
+            filters=filters.User(username=os.environ['MY_USER_NAME'])
+        )
+    )
+
+    app.add_handler(
+        CommandHandler(
+            "now",
+            now_cmd,
             filters=filters.User(username=os.environ['MY_USER_NAME'])
         )
     )
