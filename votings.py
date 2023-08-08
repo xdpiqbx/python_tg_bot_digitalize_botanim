@@ -28,12 +28,12 @@ async def save_vote(user_telegram_id: int, books_ids: list[int]):
         return
     await _insert_user(user_telegram_id)
     query = """
-        INSERT INTO vote (
-            vote_id,
+        INSERT OR REPLACE INTO vote (
+            voting_id,
             bot_user_telegram_id,
-            first_book,
-            second_book,
-            third_book
+            first_book_id,
+            second_book_id,
+            third_book_id
         )
         VALUES (?, ?, ?, ?, ?);
     """

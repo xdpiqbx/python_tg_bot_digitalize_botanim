@@ -27,15 +27,15 @@ CREATE TABLE IF NOT EXISTS voting(
     CHECK (voting_start < voting_finish)
 );
 CREATE TABLE IF NOT EXISTS vote(
-    id INTEGER PRIMARY KEY,
-    vote_id INTEGER, -- it must be voting_id
+    voting_id INTEGER,
     bot_user_telegram_id INTEGER,
-    first_book INTEGER NOT NULL,  -- it must be first_book_id
-    second_book INTEGER NOT NULL,  -- it must be second_book_id
-    third_book INTEGER NOT NULL,  -- it must be third_book_id
-    FOREIGN KEY(vote_id) REFERENCES voting(id),  -- it must be FOREIGN KEY(voting_id)
+    first_book_id INTEGER NOT NULL,
+    second_book_id INTEGER NOT NULL,
+    third_book_id INTEGER NOT NULL,
+    FOREIGN KEY(voting_id) REFERENCES voting(id),
     FOREIGN KEY(bot_user_telegram_id) REFERENCES bot_user(telegram_id),
-    FOREIGN KEY(first_book) REFERENCES book(id), -- FOREIGN KEY(first_book_id)
-    FOREIGN KEY(second_book) REFERENCES book(id), -- FOREIGN KEY(second_book_id)
-    FOREIGN KEY(third_book) REFERENCES book(id) -- FOREIGN KEY(third_book_id)
+    FOREIGN KEY(first_book_id) REFERENCES book(id),
+    FOREIGN KEY(second_book_id) REFERENCES book(id),
+    FOREIGN KEY(third_book_id) REFERENCES book(id),
+    PRIMARY KEY(voting_id, bot_user_telegram_id)
 );
