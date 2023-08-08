@@ -29,3 +29,9 @@ INSERT
     INTO voting(voting_start, voting_finish)
     VALUES ('2023-08-01', '2023-09-01');
 
+INSERT INTO vote (voting_id, bot_user_telegram_id, first_book_id, second_book_id, third_book_id)
+    VALUES
+        (1, 123, 102, 103, 100),
+        (1, 133, 100, 103, 101),
+        (1, 223, 102, 101, 100),
+        (1, 626, 93, 92, 94);

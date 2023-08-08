@@ -10,7 +10,7 @@ from books import (get_all_books,
                    get_now_reading_book,
                    get_not_started_books,
                    get_books_by_ids)
-from votings import get_actual_voting_id, save_vote
+from votings import get_actual_voting, save_vote, get_leaders
 
 load_dotenv()
 
@@ -75,7 +75,7 @@ async def now_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def vote_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if await get_actual_voting_id() is None:
+    if await get_actual_voting() is None:
         await context.bot.send_message(
             update.effective_chat.id,
             text=messages_texts.NO_ACTUAL_VOTING,
@@ -99,7 +99,7 @@ async def vote_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def vote_process(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if await get_actual_voting_id() is None:
+    if await get_actual_voting() is None:
         await context.bot.send_message(
             update.effective_chat.id,
             text=messages_texts.NO_ACTUAL_VOTING,
@@ -146,6 +146,31 @@ async def vote_process(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 # 2. send message with book ids it must be 3 different books
 # 3. get books from db and send to user
 # 4. user confirm books
+
+async def voteresults_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    vote_leaders = await get_leaders()
+    if vote_leaders is None:
+        await context.bot.send_message(
+            update.effective_chat.id,
+            text=messages_texts.NO_VOTE_RESULTS,
+            parse_mode=constants.ParseMode.HTML
+        )
+        return
+    response = (f"Голосование с {vote_leaders.vote_start} по {vote_leaders.vote_finish}\n\n"
+                f"Top 5 лидеров на сейчас:\n\n")
+    response += '\n'.join(
+        [
+            f"{i}. {leader.book_name}\n"
+            f"С рейтингом: {leader.score}\n"
+            for i, leader in enumerate(vote_leaders.leaders, 1)
+        ]
+    )
+    await context.bot.send_message(
+        update.effective_chat.id,
+        text=response,
+        parse_mode=constants.ParseMode.HTML
+    )
+
 
 def main() -> None:
     app = (
@@ -206,6 +231,14 @@ def main() -> None:
         MessageHandler(
             filters.Regex("^\d{1,3}+\s+\d{1,3}+\s+\d{1,3}$") & ~filters.COMMAND,  # 3 number in text message.
             vote_process
+        )
+    )
+
+    app.add_handler(
+        CommandHandler(
+            "voteresults",
+            voteresults_cmd,
+            filters=filters.User(username=os.environ['MY_USER_NAME'])
         )
     )
 

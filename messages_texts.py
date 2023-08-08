@@ -10,6 +10,7 @@ HELP = """Existing commands:
 /already
 /now
 /vote
+/voteresults
 """
 
 VOTE = """
@@ -31,9 +32,13 @@ VOTE_PROCESS_INCORRECT_IDENTIFIERS = """Здаётся мне друг что и
 
 NO_ACTUAL_VOTING = """Сейчас нет голосований"""
 
+NO_VOTE_RESULTS = """Промежуточные результаты отсутствуют.
+Пока никто не голосовал"""
+
 # start - Start bot
 # help - Help info
 # all_books - All books
 # already - Already read books
 # now - What are we reading now
 # vote - Vote for next book
+# voteresults - Results of current voting
