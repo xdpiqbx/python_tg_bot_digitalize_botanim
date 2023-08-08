@@ -1,15 +1,16 @@
 import os
 
 import messages_texts
+import config
 from dotenv import load_dotenv
 from telegram import Update, constants
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
-
 from books import (get_all_books,
                    get_already_read_books,
                    get_now_reading_book,
                    get_not_started_books,
                    get_books_by_ids)
+from votings import get_actual_voting_id, save_vote
 
 load_dotenv()
 
@@ -56,6 +57,7 @@ async def already_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         parse_mode=constants.ParseMode.HTML
     )
 
+
 async def now_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     books = await get_now_reading_book()
     response = "Сейчас мы читаем 📖:\n\n"
@@ -71,7 +73,15 @@ async def now_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         parse_mode=constants.ParseMode.HTML
     )
 
+
 async def vote_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if await get_actual_voting_id() is None:
+        await context.bot.send_message(
+            update.effective_chat.id,
+            text=messages_texts.NO_ACTUAL_VOTING,
+            parse_mode=constants.ParseMode.HTML
+        )
+        return
     all_books_by_categories = await get_not_started_books()
     for category in all_books_by_categories:
         books_in_category = "\n".join([f"🆔 [<b>{book.id}</b>] 📙{book.name}" for book in category.books])
@@ -87,21 +97,53 @@ async def vote_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         parse_mode=constants.ParseMode.HTML
     )
 
+
 async def vote_process(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if await get_actual_voting_id() is None:
+        await context.bot.send_message(
+            update.effective_chat.id,
+            text=messages_texts.NO_ACTUAL_VOTING,
+            parse_mode=constants.ParseMode.HTML
+        )
+        return
     user_message = update.message.text
-    books = await get_books_by_ids([book_id for book_id in user_message.split(' ')])
+    book_ids = [book_id for book_id in user_message.split(' ')]
+    if len(set(book_ids)) != config.NUMBER_OF_BOOKS:
+        await context.bot.send_message(
+            update.effective_chat.id,
+            text=messages_texts.VOTE_PROCESS_INCORRECT_INPUT,
+            parse_mode=constants.ParseMode.HTML
+        )
+        return
+    books = await get_books_by_ids(book_ids)
+    if len(books) != config.NUMBER_OF_BOOKS:
+        await context.bot.send_message(
+            update.effective_chat.id,
+            text=messages_texts.VOTE_PROCESS_INCORRECT_IDENTIFIERS,
+            parse_mode=constants.ParseMode.HTML
+        )
+        await context.bot.send_photo(
+            update.effective_chat.id,
+            photo=open('resources/img/yoda.png', 'rb')
+        )
+        return
     response = "Ты выбрал следующие книги: 📚\n\n"
     response += "\n".join([f"🆔 [<b>{book.id}</b>] 📙{book.name}" for book in books])
-    response += "\n\nСохранить?"
+    response += "\n\nСохранено."
     await context.bot.send_message(
         update.effective_chat.id,
         text=response,
         parse_mode=constants.ParseMode.HTML
     )
+    await save_vote(
+        update.message.from_user.id,
+        [int(book.id) for book in books]
+    )
+
 
 # Vote Conversation
 # 1. /vote
-# 2. send message with book ids
+# 2. send message with book ids it must be 3 different books
 # 3. get books from db and send to user
 # 4. user confirm books
 

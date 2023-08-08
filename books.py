@@ -2,6 +2,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 import aiosqlite
 
+from users import _insert_user
+
 
 @dataclass(frozen=False, kw_only=True)
 class Book:
@@ -129,4 +131,3 @@ async def get_books_by_ids(book_ids: list[str]) -> list[Book]:
             END;
     """
     return await _execute_query_get_books(query, (*book_ids, *book_ids))
-
